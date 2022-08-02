@@ -64,7 +64,7 @@ class Window(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.title = "PyQt5 Drawing Tutorial"
+        self.title = "Graph simulation"
         self.child = QWidget(self)
         for x in edgesCoords:
             tt = QLabel(str(x[0]), self)
