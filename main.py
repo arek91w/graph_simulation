@@ -13,6 +13,7 @@ list = [0, 1, 2, 3]
 output = random.choices(list, weights=[10, 50, 5, 35], k = 20)
 print(output)
 
+'''
 edgesList = [(1, 2), (1, 5), (1, 6),
                  (2, 1), (2, 3), (2, 5), (2, 6), (2, 7),
                  (3, 2), (3, 4), (3, 6), (3, 7), (3, 8),
@@ -30,13 +31,16 @@ edgesList = [(1, 2), (1, 5), (1, 6),
                  (15, 10), (15, 11), (15, 12), (15, 14), (15, 16),
                  (16, 11), (16, 12), (16, 15)
                  ]
+                 '''
 
+# positions of points
 edgesList2 = [(1, 2), (1, 5), (1, 6),
                  (2, 1), (2, 3), (2, 5), (2, 6), (2, 7),
                  (3, 2), (3, 4), (3, 6), (3, 7), (3, 8),
                  (4, 3), (4, 7), (4, 8),
                  (5, 1), (5, 2), (5, 6), (5, 9), (5, 10)]
 
+# connections between points and its weights
 connectionsList = [(0, 3, 0.6), (0 , 4, 0.4), (3, 0, 0.3), (3, 8, 0.7), (4, 0, 0.2), (4, 8, 0.4), (4, 9, 0.4),
                     (8, 3, 0.1), (8, 4, 0.3), (8, 13, 0.6), (9, 4, 0.3), (9, 13, 0.2), (9, 5, 0.5),
                      (13, 8, 0.3), (13, 9, 0.3), (13, 17, 0.4), (17, 13, 0.5), (17, 16, 0.), (16, 17, 1),
@@ -48,6 +52,7 @@ connectionsList = [(0, 3, 0.6), (0 , 4, 0.4), (3, 0, 0.3), (3, 8, 0.7), (4, 0, 0
                      (14, 11, 0.2), (14, 15, 0.2), (14, 18, 0.4), (18, 14, 1), (15, 12, 0.2),
                      (15, 14, 0.2), (15, 19, 0.6), (19, 15, 1)]
 
+# coords of connection labels
 edgesCoords = [(0, 118, 114), (1, 138, 114),  (2, 118, 200), (3, 138, 200), (4, 198, 114),
                 (5, 218, 114), (6, 198, 200), (7, 218, 200), (8, 400, 114), (9, 420, 114), 
                 (10, 354, 200), (11, 374, 200), (12, 282, 200), (13, 302, 200), (14, 198, 274),
@@ -66,6 +71,8 @@ class Window(QMainWindow):
         super().__init__()
         self.title = "Graph simulation"
         self.child = QWidget(self)
+
+        # place each label
         for x in edgesCoords:
             tt = QLabel(str(x[0]), self)
             tt.move(x[1], x[2])
@@ -73,8 +80,11 @@ class Window(QMainWindow):
         self.child.resize(10, 10)
         self.top= 150
         self.left= 150
+        # window height and width
         self.width = 500
         self.height = 800
+
+
         self.radius = 80
         
         self.InitWindow()
@@ -84,48 +94,57 @@ class Window(QMainWindow):
         self.setWindowTitle(self.title)
         self.setGeometry(self.top, self.left, self.width, self.height)
         self.show()
+
+        # object of group of animation 
         self.anim_group = QSequentialAnimationGroup()
         self.starting_point = 0
         self.ending_point = self.chooseNextPoint(self.starting_point)
         while True:
+
+            # if dot is in exit point ( 19) then break the loop
             if self.ending_point == 19:
                 self.anim_group.addAnimation(self.animate(self.starting_point, self.ending_point))
                 break
             else:
+                # simulate random animation between two points
                 self.anim_group.addAnimation(self.animate(self.starting_point, self.ending_point))
                 self.starting_point = self.ending_point
                 self.ending_point = self.chooseNextPoint(self.starting_point)
-        #self.animate(self.starting_point, self.ending_point)
         self.anim_group.start()
         self.starting_point = self.ending_point
         self.ending_point = self.chooseNextPoint(self.starting_point)
         print(f'{self.starting_point}, ccc')
-        #self.animate(self.starting_point, self.ending_point)
     
+
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setPen(QPen())
         painter.setPen(Qt.GlobalColor.black)
         #painter.drawEllipse(40, 40, 400, 400)
+
+        # draw points
         for edge in edgesList2:
             painter.drawEllipse(edge[0]*self.radius, edge[1]*self.radius, 20, 20)
+
+        # draw connections
         for conn in connectionsList:
-            #print(edgesList[conn[0]][0])
             dir_angle_x = edgesList2[conn[1]][0] - edgesList2[conn[0]][0]
-            dir_angle_y = edgesList[conn[1]][1] - edgesList[conn[0]][1]
+            dir_angle_y = edgesList2[conn[1]][1] - edgesList2[conn[0]][1]
             sinu = dir_angle_x/(dir_angle_x**2+dir_angle_y**2)
             degg_sin = np.arcsin(sinu)
-            painter.drawLine(edgesList2[conn[0]][0]*self.radius + 10, edgesList2[conn[0]][1]*self.radius + 10, edgesList[conn[1]][0]*self.radius + 10, edgesList[conn[1]][1]*self.radius + 10)
+            painter.drawLine(edgesList2[conn[0]][0]*self.radius + 10, edgesList2[conn[0]][1]*self.radius + 10, edgesList2[conn[1]][0]*self.radius + 10, edgesList2[conn[1]][1]*self.radius + 10)
         painter.drawLine(20, 20, 10, 10)
 
+    # animate single connection between 2 points
     def animate(self, ind0, ind1):
         self.anim = QPropertyAnimation(self.child, b"pos")
-        self.anim.setStartValue(QPoint(edgesList[ind0][0]*80, edgesList[ind0][1]*80))
-        self.anim.setEndValue(QPoint(edgesList[ind1][0]*80, edgesList[ind1][1]*80))
+        self.anim.setStartValue(QPoint(edgesList2[ind0][0]*80, edgesList2[ind0][1]*80))
+        self.anim.setEndValue(QPoint(edgesList2[ind1][0]*80, edgesList2[ind1][1]*80))
         self.anim.setDuration(300)
         return self.anim
         #self.anim.start()
 
+    # function returning next point based on input point
     def chooseNextPoint(self, point):
         conn2 = filter(lambda x: x[0] == point, connectionsList)
         out_points_possibles = []
